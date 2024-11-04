@@ -1,7 +1,9 @@
-add_executable(main main.c)
+add_executable(main
+        main.c
+        mpu6050.c
+)
 
-# pull in common dependencies
-target_link_libraries(main pico_stdlib)
-
-# create map/bin/hex/uf2 file etc.
+target_link_libraries(main pico_stdlib hardware_i2c freertos Fusion)
 pico_add_extra_outputs(main)
+
+add_library(mpu6050 mpu6050.c)
