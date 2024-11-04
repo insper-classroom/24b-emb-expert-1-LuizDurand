@@ -55,9 +55,9 @@ static void mpu6050_task(void *p) {
     }
 
     // Configuração opcional de detecção de movimento
-    mpu6050_set_motion_detection_threshold(imu_config, 1);
-    mpu6050_set_motion_detection_duration(imu_config, 20);
-    mpu6050_set_motion_detection(imu_config, 1);
+    // mpu6050_set_motion_detection_threshold(imu_config, 1);
+    // mpu6050_set_motion_detection_duration(imu_config, 20);
+    // mpu6050_set_motion_detection(imu_config, 1);
 
     int16_t acceleration[3], gyro[3], temp;
 
@@ -98,11 +98,13 @@ static void mpu6050_task(void *p) {
         if(fabs(euler.angle.roll) >= 10){
             mouse_data.axis = 1;
             mouse_data.val = -euler.angle.roll;
+            printf("Roll: %d",-euler.angle.roll);
             xQueueSend(xQueueAdc, &mouse_data, portMAX_DELAY);
         }
         if(fabs(euler.angle.yaw) >= 10){
             mouse_data.axis = 0;
             mouse_data.val = -euler.angle.yaw;
+             printf("Yaw: %d",-euler.angle.yaw);
             xQueueSend(xQueueAdc, &mouse_data, portMAX_DELAY);
         }
         if(fabs(accelerometer.axis.y) >= 1.5){
@@ -121,10 +123,7 @@ void uart_task(void *p) {
 
     while (1) {
         if(xQueueReceive(xQueueAdc, &mouse_data, portMAX_DELAY)){
-            uart_putc(uart0, mouse_data.axis);
-            uart_putc(uart0, (mouse_data.val >> 8) & 0xFF);
-            uart_putc(uart0, mouse_data.val & 0xFF);
-            uart_putc(uart0, -1); // Delimitador de pacote
+            //printf("Axis: %d, Value: %f\n", mouse_data.axis, mouse_data.val);
         }
     }
 }
