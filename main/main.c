@@ -44,13 +44,13 @@ static void mpu6050_task(void *p) {
     mpu6050_set_config(&imu_config, i2c0, I2C_SDA_GPIO, I2C_SCL_GPIO, 0); // acc_scale = 0 para ±2G
 
     if (!mpu6050_init(imu_config)) {
-        printf("Falha ao inicializar o MPU6050\n");
+        
         vTaskDelete(NULL);
     }
 
     // Reinicia o MPU6050
     if (!mpu6050_reset(imu_config)) {
-        printf("Falha ao reiniciar o MPU6050\n");
+        
         vTaskDelete(NULL);
     }
 
@@ -72,7 +72,7 @@ static void mpu6050_task(void *p) {
         if (!mpu6050_read_acc(imu_config, acceleration) ||
             !mpu6050_read_gyro(imu_config, gyro) ||
             !mpu6050_read_temp(imu_config, &temp)) {
-            printf("Falha ao ler dados do MPU6050\n");
+            
             vTaskDelay(pdMS_TO_TICKS(100));
             continue;
         }
@@ -124,7 +124,7 @@ void uart_task(void *p) {
             uart_putc(uart0, mouse_data.axis);
             uart_putc(uart0, (mouse_data.val >> 8) & 0xFF);
             uart_putc(uart0, mouse_data.val & 0xFF);
-            uart_putc(uart0, (char)-1); // Delimitador de pacote
+            uart_putc(uart0, -1); // Delimitador de pacote
         }
     }
 }
@@ -140,20 +140,9 @@ int main() {
 
     // Cria a fila para comunicação entre tasks
     xQueueAdc = xQueueCreate(32, sizeof(mouse));
-    if (xQueueAdc == NULL) {
-        printf("Falha ao criar a fila\n");
-        return 1;
-    }
 
-    // Cria as tasks
-    if(xTaskCreate(mpu6050_task, "mpu6050_Task", 8192, NULL, 1, NULL) != pdPASS){
-        printf("Falha ao criar a task mpu6050_task\n");
-        return 1;
-    }
-    if(xTaskCreate(uart_task, "uart_task", 4096, NULL, 1, NULL) != pdPASS){
-        printf("Falha ao criar a task uart_task\n");
-        return 1;
-    }
+    xTaskCreate(mpu6050_task, "mpu6050_Task 1", 8192, NULL, 1, NULL);
+    xTaskCreate(uart_task, "uart_task", 4096, NULL, 1, NULL);
 
     // Inicia o scheduler do FreeRTOS
     vTaskStartScheduler();
